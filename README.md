@@ -6,11 +6,13 @@
 **Activate the virtual environment**:
 - **On Windows**:
 ```bash
+python -m venv webscraping_env
 .\webscraping_env\Scripts\activate
 ```
 
 - **On macOS and Linux**:
 ```bash
+python3 -m venv webscraping_env
 source webscraping_env/bin/activate
 ```
 
