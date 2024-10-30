@@ -87,7 +87,38 @@ def save_to_csv(data_row):
         # Write the data row
         writer.writerow(data_row)
 
-def print_data(data_row):
+def convert_data_from_read_csv(data):
+    """Extracts key values from the data for opening and closing prices."""
+    bid_open = data[0]["bid_price"]
+    ask_open = data[0]["ask_price"]
+    latest_entry = data[-1]
+    date, time = latest_entry["Date"], latest_entry["Time"]
+    bid_close = latest_entry["bid_price"]
+    bid_change = bid_close - bid_open
+
+    return {
+        "date": date,
+        "time": time,
+        "bid_open": bid_open,
+        "bid_close": bid_close,
+        "bid_change": bid_change,
+        "ask_open": ask_open
+    }
+
+def display_results(results, max_bid, min_bid, max_ask, min_ask):
+    """Displays the extracted key values and max/min statistics."""
+    print("Date:", results["date"])
+    print("Time:", results["time"])
+    print("Bid Open (BO):", results["bid_open"])
+    print("Bid High (BH):", max_bid)
+    print("Bid Low (BL):", min_bid)
+    print("Bid Close (BC):", results["bid_close"])
+    print("Bid Change (BCH):", results["bid_change"])
+    print("Ask Open (AO):", results["ask_open"])
+    print("Ask High (AH):", max_ask)
+    print("Ask Low (AL):", min_ask)
+
+def print_data_form_scrape(data_row):
     """Print the data to the console."""
     print("#"*20,data_row[1],"#"*20)
     print("Date:", data_row[0])
@@ -103,7 +134,7 @@ def main():
         while True:
             data_row = scrape_data(driver)
             save_to_csv(data_row)
-            print_data(data_row)
+            print_data_form_scrape(data_row)
 
             # Wait for 10 seconds before the next iteration
             time.sleep(1)
@@ -115,24 +146,7 @@ def main():
 if __name__ == "__main__":
     # main()
     # print(read_csv_file())
-    data, BH, BL, AH, AL = read_csv_and_find_min_max()
-    BO = data[0]["bid_price"]
-    AO = data[0]["ask_price"]
-    date = data[-1]["Date"]
-    time = data[-1]["Time"]
-    BC = data[-1]["bid_price"]
-    BCH = BC - BO
 
-    print("Date:", date)
-    print("Time:", time)
-    print("BO:", BO)
-    print("BH:", BH)
-    print("BL:", BL)
-    print("BC:", BC)
-    print("BCH:", BCH)
-    print("AO:", AO)
-    print("AH:", AH)
-    print("AL:", AL)
-    # driver = initialize_driver()
-    # driver.get("https://www.forex.com/en/forex-trading/eur-usd/")
-    # time.sleep(120)
+    data, max_bid, min_bid, max_ask, min_ask = read_csv_and_find_min_max()
+    results = convert_data_from_read_csv(data)
+    display_results(results, max_bid, min_bid, max_ask, min_ask)
