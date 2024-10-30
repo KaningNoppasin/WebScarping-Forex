@@ -20,6 +20,7 @@ source webscraping_env/bin/activate
 ```bash
 pip install selenium
 pip install bs4
+pip install matplotlib
 ```
 
 ## Running the Project
