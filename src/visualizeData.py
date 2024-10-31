@@ -136,9 +136,9 @@ def main():
     save_to_csv(stats)
 
 if __name__ == "__main__":
-    # schedule.every(2).minutes.do(main)
+    schedule.every(10).minutes.do(main)
     try:
-        schedule.every(10).seconds.do(main)
+        # schedule.every(10).seconds.do(main)
         while True:
             schedule.run_pending()
             time.sleep(1)
