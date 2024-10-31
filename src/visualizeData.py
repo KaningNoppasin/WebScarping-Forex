@@ -1,11 +1,30 @@
 from datetime import datetime
 import csv
 import config
+import os
+import schedule
+import time
 
 csv_file = config.csv_file
+position_file = config.position_file
+header_line = config.header_line
+
+def load_last_position():
+    """Load the last read position from the text file."""
+    if os.path.exists(position_file):
+        with open(position_file, 'r') as f:
+            return int(f.read().strip())
+    return 0  # Start from the beginning if the file doesn't exist
+
+def save_last_position(position):
+    """Save the last read position to the text file."""
+    with open(position_file, 'w') as f:
+        f.write(str(position))
 
 def read_csv():
     """Reads the CSV file and extracts bid and ask prices."""
+    last_position = load_last_position()
+    print("last_position:",last_position)
     data = []
     max_bid_price = float('-inf')
     min_bid_price = float('inf')
@@ -13,7 +32,12 @@ def read_csv():
     min_ask_price = float('inf')
 
     with open(csv_file, mode='r') as file:
-        csv_reader = csv.DictReader(file)
+        file.seek(last_position)
+
+        # Skip header if resuming from a position other than the start
+        if last_position == 0:
+            file.readline()  # Skip the header line
+        csv_reader = csv.DictReader(file,fieldnames=header_line.strip().split(','))
         for row in csv_reader:
             # Convert bid and ask prices to floats
             bid_price = float(row['bid_price'])
@@ -29,11 +53,16 @@ def read_csv():
             min_bid_price = min(min_bid_price, bid_price)
             max_ask_price = max(max_ask_price, ask_price)
             min_ask_price = min(min_ask_price, ask_price)
+        last_position = file.tell()
+        save_last_position(last_position)  # Save the new position
 
     return data, max_bid_price, min_bid_price, max_ask_price, min_ask_price
 
 def extract_prices(data):
     """Extracts opening and closing prices from the data."""
+    if not data:
+        print("--- No new data to process. ---")
+        return None  # Or handle this as needed
     bid_open = data[0]["bid_price"]
     ask_open = data[0]["ask_price"]
     latest_entry = data[-1]
@@ -66,7 +95,8 @@ def main():
     """Main function to read data, extract prices, and display results."""
     data, max_bid, min_bid, max_ask, min_ask = read_csv()
     results = extract_prices(data)
-
+    if not results:
+        return None
     # Prepare a single dictionary argument for display_statistics
     stats = {
         **results,
@@ -79,4 +109,8 @@ def main():
     display_statistics(stats)
 
 if __name__ == "__main__":
-    main()
+    # schedule.every(10).minutes.do(main)
+    schedule.every(10).seconds.do(main)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)

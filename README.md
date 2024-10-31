@@ -21,9 +21,11 @@ source webscraping_env/bin/activate
 pip install selenium
 pip install bs4
 pip install matplotlib
+pip install schedule
 ```
 
 ## Running the Project
 ```bash
-python src/main.py
+python src/scrapingData.py
+python src/visualizeData.py
 ```
