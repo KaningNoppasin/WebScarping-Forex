@@ -80,7 +80,7 @@ def main():
             print_data_form_scrape(data_row)
 
             # Wait for 10 seconds before the next iteration
-            time.sleep(1)
+            time.sleep(5)
     except KeyboardInterrupt:
         print("\nProcess interrupted by the user. Exiting gracefully.")
     finally:

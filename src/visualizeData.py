@@ -6,6 +6,7 @@ import schedule
 import time
 
 csv_file = config.csv_file
+visualizeData_csv_file = config.visualizeData_csv_file
 position_file = config.position_file
 header_line = config.header_line
 
@@ -24,7 +25,6 @@ def save_last_position(position):
 def read_csv():
     """Reads the CSV file and extracts bid and ask prices."""
     last_position = load_last_position()
-    print("last_position:",last_position)
     data = []
     max_bid_price = float('-inf')
     min_bid_price = float('inf')
@@ -80,6 +80,7 @@ def extract_prices(data):
 
 def display_statistics(stats):
     """Displays the statistics from a single dictionary argument."""
+    print("#"*20, stats["time"],"#"*20)
     print("Date:", stats["date"])
     print("Time:", stats["time"])
     print("Bid Open (BO):", stats["bid_open"])
@@ -90,6 +91,31 @@ def display_statistics(stats):
     print("Ask Open (AO):", stats["ask_open"])
     print("Ask High (AH):", stats["max_ask"])
     print("Ask Low (AL):", stats["min_ask"])
+
+def save_to_csv(stats):
+    """Append data to the CSV file."""
+    data_row = [
+        stats["date"],
+        stats["time"],
+        stats["bid_open"],
+        stats["max_bid"],
+        stats["min_bid"],
+        stats["bid_close"],
+        stats["bid_change"],
+        stats["ask_open"],
+        stats["max_ask"],
+        stats["min_ask"]
+    ]
+    with open(visualizeData_csv_file, mode='a', newline='') as file:
+        writer = csv.writer(file)
+
+        # Write the header if the file is empty
+        if file.tell() == 0:
+            writer.writerow([
+                "Date", "Time", "BO", "BH", "BL", "BC", "BCh", "AO", "AH", "AL"
+            ])
+        # Write the data row
+        writer.writerow(data_row)
 
 def main():
     """Main function to read data, extract prices, and display results."""
@@ -107,10 +133,14 @@ def main():
     }
 
     display_statistics(stats)
+    save_to_csv(stats)
 
 if __name__ == "__main__":
-    # schedule.every(10).minutes.do(main)
-    schedule.every(10).seconds.do(main)
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    # schedule.every(2).minutes.do(main)
+    try:
+        schedule.every(10).seconds.do(main)
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\nProcess interrupted by the user. Exiting gracefully.")
