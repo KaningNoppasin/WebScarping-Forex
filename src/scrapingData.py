@@ -80,7 +80,7 @@ def main():
             print_data_form_scrape(data_row)
 
             # Wait for 10 seconds before the next iteration
-            time.sleep(5)
+            time.sleep(60)
     except KeyboardInterrupt:
         print("\nProcess interrupted by the user. Exiting gracefully.")
     finally:
@@ -88,3 +88,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # driver = initialize_driver()
+    # driver.get("https://www.forex.com/en/forex-trading/eur-usd/")
+    # time.sleep(100)
