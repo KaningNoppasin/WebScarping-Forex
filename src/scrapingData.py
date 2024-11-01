@@ -27,16 +27,18 @@ def scrape_data(driver):
     # Parse the page source with BeautifulSoup
     soup = BeautifulSoup(html, 'html.parser')
 
+    instrument_heading = soup.find('div', class_='instrument-heading-section__pricing instrument-pricing')
+    instrument_pricing_rates = instrument_heading.find('div', class_='instrument-pricing__rates')
+
+    sell_value = instrument_pricing_rates.find('div', class_='instrument-pricing__bid').find('div', class_='instrument-pricing__rate-value').text
+    buy_value = instrument_pricing_rates.find('div', class_='instrument-pricing__offer').find('div', class_='instrument-pricing__rate-value').text
+
     now = datetime.now()
     date_formatted = now.strftime('%Y-%m-%d')
     time_formatted = now.strftime('%H:%M:%S')
 
-    pricing_div = soup.find('div', class_='instrument-heading-section__pricing')
-    data_initial_data = pricing_div['data-initial-data']
-    pricing_data = json.loads(data_initial_data)
-
-    bid_price = pricing_data['ratesFields'][0]['fieldValue']  # Sell price
-    offer_price = pricing_data['ratesFields'][1]['fieldValue']  # Buy price
+    bid_price = sell_value      # Sell price
+    offer_price = buy_value     # Buy price
 
     data_row = [
         date_formatted,
@@ -80,14 +82,16 @@ def main():
             print_data_form_scrape(data_row)
 
             # Wait for 10 seconds before the next iteration
-            time.sleep(60)
+            time.sleep(50)
     except KeyboardInterrupt:
         print("\nProcess interrupted by the user. Exiting gracefully.")
+    except Exception as err:
+        print("Error:",err)
     finally:
-        driver.quit()  # Ensure the WebDriver is closed on exit
+        try:
+            driver.quit()  # Ensure the WebDriver is closed on exit
+        except Exception as err:
+            print("Error:",err)
 
 if __name__ == "__main__":
     main()
-    # driver = initialize_driver()
-    # driver.get("https://www.forex.com/en/forex-trading/eur-usd/")
-    # time.sleep(100)

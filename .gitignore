@@ -1,4 +1,2 @@
 # Ignore Python virtual environment
 webscraping_env/
-
-data/raw/*
